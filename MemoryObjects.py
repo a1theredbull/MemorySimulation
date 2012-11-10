@@ -10,10 +10,10 @@ class Frame(object):
 	fid = 0
 	used = 0
 	size = MAX_SIZE
-	page = None
 	
 	def __init__(self, fid):
 		self.fid = fid
+		self.page = Page(0, '', 0, True)
 
 	def __str__(self):
 		return 'Frame ' + str(self.fid) + ': ' + str(self.used) + '/' + str(self.size) + \
@@ -21,7 +21,7 @@ class Frame(object):
 		
 	def emptyFrame(self):
 		self.used = 0
-		self.page = None
+		self.page.resetPage()
 
 class Process(object):
 	pid = 0
@@ -41,7 +41,13 @@ class Page(object):
 	used = 0
 	size = MAX_SIZE
 	
-	def __init__(self, pid, name, used):
+	def __init__(self, pid, name, used, empty):
 		self.pid = pid
 		self.name = name
 		self.used = used
+		self.empty = empty
+		
+	def resetPage(self):
+		self.used = 0
+		self.empty = True
+		self.name = ''
