@@ -5,6 +5,14 @@ from tkinter import messagebox
 from tkinter import filedialog
 import OSBehavior
 import MemorySim
+import MemoryObjects
+
+def IsInt(input):
+	try:
+		int(input)
+		return True
+	except ValueError:
+		return False
 
 class SpecifyFile(Toplevel):
 	def __init__(self, master=None):
@@ -17,17 +25,36 @@ class SpecifyFile(Toplevel):
 		self.createWidgets()
 		
 	def createWidgets(self):
-		filename_label = Label(self, width=60, textvariable=self.filename)
-		filename_label.grid(row=0, column=0)
+		self.filename_text = Entry(self, width=55, state=DISABLED, textvariable=self.filename)
+		self.filename_text.grid(row=0, column=0, columnspan=4, padx=10)
 		browse_button = Button(self, width=10, text='Browse', command=(lambda:
 			self.filename.set(filedialog.askopenfilename())))
-		browse_button.grid(row=0, column=1)
+		browse_button.grid(row=0, column=4)
 		ok_button = Button(self, text='OK', width=10, command=self.reset)
-		ok_button.grid(row=1, column=1, pady=3)
+		ok_button.grid(row=1, column=4, pady=3)
+		
+		page_size_label = Label(self, text='Frame size')
+		page_size_label.grid(row=1, column=0, padx=2)
+		self.page_size_text = Entry(self, width=10)
+		self.page_size_text.grid(row=1, column=1, padx=2)
+		
+		num_frames_label = Label(self, text='# of Frames')
+		num_frames_label.grid(row=1, column=2, padx=2)
+		self.num_frames_text = Entry(self, width=10)
+		self.num_frames_text.grid(row=1, column=3, padx=2)
 	
 	def reset(self):
+		num_frames_input = self.num_frames_text.get()
+		page_size_input = self.page_size_text.get()
+		filename_input = self.filename_text.get()
+		
+		if not(IsInt(num_frames_input) and IsInt(page_size_input) and filename_input != ''):
+			messagebox.showinfo(title='Incomplete form', message='Need to specify valid settings before starting simulation!')
+			return
+		OSBehavior.NUM_FRAMES = int(num_frames_input)
+		MemoryObjects.MAX_SIZE = int(page_size_input)
 		self.destroy()
-		msim = MemorySim.MemorySim(self.filename.get())
+		msim = MemorySim.MemorySim(filename_input)
 		sim_interface = SimInterface(msim, master = root)
 		
 class SimInterface(Frame):

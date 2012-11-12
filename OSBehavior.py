@@ -69,9 +69,9 @@ def allocateData(process, phys_m):
 
 def findOpenFrames(phys_m):
 	open_frames = []
-	#detects if page in frame is a placeholder(empty)
+	#detects if page in frame is a placeholder(isEmpty)
 	for frame in phys_m.frames:
-		if frame.page.empty == True:
+		if frame.page.isEmpty == True:
 			open_frames.append(frame)
 	return open_frames
 	
@@ -79,7 +79,7 @@ def freeMemory(line, phys_m):
 	process = findProcess(int(line[0]))[0]
 	#frees frame
 	for frame in phys_m.frames:
-		if frame.page.empty == False and frame.page.pid == process.pid:
+		if frame.page.isEmpty == False and frame.page.pid == process.pid:
 			frame.emptyFrame()
 	
 #finds process in list of processes by id

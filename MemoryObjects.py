@@ -7,13 +7,11 @@ class PhysicalM(object):
 		self.frames = frames
 
 class Frame(object):
-	fid = 0
-	used = 0
-	size = MAX_SIZE
-	
 	def __init__(self, fid):
 		self.fid = fid
 		self.page = Page(0, '', 0, True)
+		self.used = 0
+		self.size = MAX_SIZE
 
 	def __str__(self):
 		return 'Frame ' + str(self.fid) + ': ' + str(self.used) + '/' + str(self.size) + \
@@ -24,8 +22,6 @@ class Frame(object):
 		self.page.resetPage()
 
 class Process(object):
-	pid = 0
-
 	def __init__(self, pid, text_size, data_size):
 		self.pid = pid
 		self.text_size = text_size
@@ -38,16 +34,14 @@ class ProcessTable(object):
 	pageToFrame = {}
 
 class Page(object):
-	used = 0
-	size = MAX_SIZE
-	
-	def __init__(self, pid, name, used, empty):
+	def __init__(self, pid, name, used, isEmpty):
 		self.pid = pid
 		self.name = name
 		self.used = used
-		self.empty = empty
+		self.size = MAX_SIZE
+		self.isEmpty = isEmpty
 		
 	def resetPage(self):
 		self.used = 0
-		self.empty = True
+		self.isEmpty = True
 		self.name = ''
