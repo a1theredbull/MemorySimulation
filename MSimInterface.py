@@ -26,41 +26,42 @@ class SpecifyFile(Toplevel):
 		
 	def createWidgets(self):
 		self.filename_text = Entry(self, width=55, state=DISABLED, textvariable=self.filename)
-		self.filename_text.grid(row=0, column=0, columnspan=4, padx=10)
+		self.filename_text.grid(columnspan=4, padx=10)
 		browse_button = Button(self, width=10, text='Browse', command=(lambda:
 			self.filename.set(filedialog.askopenfilename())))
 		browse_button.grid(row=0, column=4)
 		ok_button = Button(self, text='OK', width=10, command=self.reset)
 		ok_button.grid(row=1, column=4, pady=3)
 		
+		self.page_size_input = StringVar()
+		self.page_size_input.set('512')
 		page_size_label = Label(self, text='Frame size')
-		page_size_label.grid(row=1, column=0, padx=2)
-		self.page_size_text = Entry(self, width=10)
+		page_size_label.grid(row=1, padx=2)
+		self.page_size_text = Entry(self, width=10, textvariable=self.page_size_input)
 		self.page_size_text.grid(row=1, column=1, padx=2)
 		
+		self.num_frames_input = StringVar()
+		self.num_frames_input.set('8')
 		num_frames_label = Label(self, text='# of Frames')
 		num_frames_label.grid(row=1, column=2, padx=2)
-		self.num_frames_text = Entry(self, width=10)
+		self.num_frames_text = Entry(self, width=10, textvariable=self.num_frames_input)
 		self.num_frames_text.grid(row=1, column=3, padx=2)
 	
 	def reset(self):
-		num_frames_input = self.num_frames_text.get()
-		page_size_input = self.page_size_text.get()
-		filename_input = self.filename_text.get()
-		
-		if not(IsInt(num_frames_input) and IsInt(page_size_input) and filename_input != ''):
+		if not(IsInt(self.num_frames_input.get()) and IsInt(self.page_size_input.get()) and self.filename.get() != ''):
 			messagebox.showinfo(title='Incomplete form', message='Need to specify valid settings before starting simulation!')
 			return
-		OSBehavior.NUM_FRAMES = int(num_frames_input)
-		MemoryObjects.MAX_SIZE = int(page_size_input)
+		OSBehavior.NUM_FRAMES = int(self.num_frames_input.get())
+		MemoryObjects.MAX_SIZE = int(self.page_size_input.get())
 		self.destroy()
-		msim = MemorySim.MemorySim(filename_input)
+		msim = MemorySim.MemorySim(self.filename.get())
 		sim_interface = SimInterface(msim, master = root)
 		
 class SimInterface(Frame):
 	def __init__(self, msim, master = None):
 		self.msim = msim
 		self.page_names = [] #used for button text
+		self.page_sizes = []
 		self.frame_labels = [] #used for coloring
 		self.curr_cmd = StringVar()
 		self.curr_cmd.set('Step: ' + msim.mem_events[0].strip())
@@ -70,26 +71,33 @@ class SimInterface(Frame):
 
 	def createWidgets(self):
 		frames_frame = Frame(self, relief=RAISED, borderwidth=1)
-		frames_frame.grid(row=0, column=0, columnspan=2)
+		frames_frame.grid(columnspan=3)
 		
 		#creates frames visualization
 		for frame in self.msim.frames:
 			self.page_names.append(StringVar(frame.page.name))
+			tempFormat = StringVar() #cannot parse to str and put into StringVar at same time
+			tempFormat.set(str(frame.page.used) + '/' + str(frame.page.size)) #read above ^
+			self.page_sizes.append(tempFormat)
+			
 			f_label = Label(frames_frame, text='Frame ' + str(frame.fid))
-			f_label.grid(row=frame.fid, column=0, padx=5)
-			self.frame_labels.append(f_label)
+			f_label.grid(row=frame.fid, padx=5)
 			f_button = Button(frames_frame, width=30, textvariable=self.page_names[frame.fid])
 			f_button.grid(row=frame.fid, column=1, padx=5, pady=3)
+			f_size_label = Label(frames_frame, width=8, textvariable=self.page_sizes[frame.fid])
+			f_size_label.grid(row=frame.fid, column=2, padx=3)
+			
+			self.frame_labels.append(f_label)
 		
 		#if runs out of commands in queue, warn user
 		#otherwise step through the command(first in queue)
 		self.STEP = Button(self, width=20, textvariable=self.curr_cmd, command=(lambda: 
 			(messagebox.showinfo(title='Finished', message='No more events.  Press reset to run another simulation.')
 			if not self.msim.mem_events else self.stepCmd())))
-		self.STEP.grid(row=1, column=0, pady=10)
+		self.STEP.grid(row=1, pady=10)
 		
 		self.RESET = Button(self, width=10, text='Reset', command=self.reset)
-		self.RESET.grid(row=1, column=1, padx=2, pady=10)
+		self.RESET.grid(row=1, column=1, pady=10)
 		
 	def stepCmd(self):
 		self.resetFrameColors()
@@ -97,6 +105,7 @@ class SimInterface(Frame):
 		self.curr_cmd.set(info[0].strip())
 		frames = info[1]
 		for frame in frames:
+			self.page_sizes[frame.fid].set(str(frame.page.used) + '/' + str(frame.page.size))
 			visual_pg_name = self.page_names[frame.fid]
 			#detects frees and insertions
 			if visual_pg_name.get() == '' and frame.page.name != '':
