@@ -25,18 +25,18 @@ def allocateText(process, phys_m):
 		remaining -= MemoryObjects.MAX_SIZE
 		count += 1
 
-	open_frames = findOpenFrames(phys_m)
+	open_frames = findOpenFrames(phys_m) #returns list of open frames
 	
 	#map text pages to open frames
 	for pg in txt_pages:
 		if not open_frames:
 			print('Full physical memory.')
 		else:
-			process.text_pg_table[str(pg.number)] = open_frames[0].fid
-			process.text_pages.append(pg)
-			open_frames[0].used = pg.used
+			process.text_pg_table[str(pg.number)] = open_frames[0].fid #map to page table
+			process.text_pages.append(pg) #add to list of text pages
+			open_frames[0].used = pg.used #set frame info
 			open_frames[0].page = pg
-			open_frames.pop(0)
+			open_frames.pop(0) #remove frame from open frame list
 	
 #finds open frames for data pages to be allocated to
 def allocateData(process, phys_m):
@@ -54,22 +54,22 @@ def allocateData(process, phys_m):
 		remaining -= MemoryObjects.MAX_SIZE
 		count += 1
 
-	open_frames = findOpenFrames(phys_m)
+	open_frames = findOpenFrames(phys_m) #returns list of open frames
 	
 	#map data pages to open frames
 	for pg in dat_pages:
 		if not open_frames:
 			print('Full physical memory.')
 		else:
-			process.data_pg_table[str(pg.number)] = open_frames[0].fid
-			process.data_pages.append(pg)
-			open_frames[0].used = pg.used
+			process.data_pg_table[str(pg.number)] = open_frames[0].fid #map to page table
+			process.data_pages.append(pg) #add to list of data pages
+			open_frames[0].used = pg.used #set frame info
 			open_frames[0].page = pg
-			open_frames.pop(0)
+			open_frames.pop(0) #remove frame from open frame list
 
 def findOpenFrames(phys_m):
 	open_frames = []
-	#detects if page in frame is a placeholder(isEmpty)
+	#detects if page in frame is a placeholder(Page.isEmpty)
 	for frame in phys_m.frames:
 		if frame.page.isEmpty == True:
 			open_frames.append(frame)
@@ -77,7 +77,7 @@ def findOpenFrames(phys_m):
 	
 def freeMemory(line, phys_m):
 	process = findProcess(int(line[0]))[0]
-	#frees frame
+	#frees frames part of process that has been halted
 	for frame in phys_m.frames:
 		if frame.page.isEmpty == False and frame.page.pid == process.pid:
 			frame.emptyFrame()

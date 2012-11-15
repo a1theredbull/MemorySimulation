@@ -5,12 +5,14 @@ class MemorySim(object):
 	def __init__(self, filename):
 		file = open(filename, 'r')
 	
-		#stores memory event strings and initialized frames
-		self.mem_events = []
-		self.frames = []
+		self.mem_events = [] #stores memory event strings
+		self.frames = [] #stores initialized frames
+		
 		for i in range(0, OSBehavior.NUM_FRAMES):
 			self.frames.append(MemoryObjects.Frame(i))
+			
 		self.phys_m = MemoryObjects.PhysicalM(self.frames)
+		
 		for line in file:
 			self.mem_events.append(line)
 

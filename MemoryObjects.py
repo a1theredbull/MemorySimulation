@@ -26,10 +26,10 @@ class Process(object):
 		self.pid = pid
 		self.text_size = text_size
 		self.data_size = data_size
-		self.text_pages = []
-		self.data_pages = []
-		self.text_pg_table = {}
-		self.data_pg_table = {}
+		self.text_pages = [] #holds Page objects
+		self.data_pages = [] #holds Page objects
+		self.text_pg_table = {} #maps text page numbers to frame numbers
+		self.data_pg_table = {} #maps data page numbers to frame numbers
 
 class Page(object):
 	def __init__(self, pid, number, name, used, isEmpty):
@@ -38,7 +38,7 @@ class Page(object):
 		self.name = name
 		self.used = used
 		self.size = MAX_SIZE
-		self.isEmpty = isEmpty
+		self.isEmpty = isEmpty #flag to use as placeholder for empty pages
 		
 	def resetPage(self):
 		self.used = 0

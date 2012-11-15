@@ -87,10 +87,10 @@ class PageTable(Toplevel):
 		entries.sort()
 		offset = 1
 		for entry in entries:
-			self.key_label = Label(pg_tb_frame, text=entry)
-			self.key_label.grid(row=offset, column=1, padx=5)
-			self.value_label = Label(pg_tb_frame, text=self.process.text_pg_table[entry])
-			self.value_label.grid(row=offset, column=2, padx=5)
+			key_label = Label(pg_tb_frame, text=entry)
+			key_label.grid(row=offset, column=1, padx=5)
+			value_label = Label(pg_tb_frame, text=self.process.text_pg_table[entry])
+			value_label.grid(row=offset, column=2, padx=5)
 			offset += 1
 		
 		data_label = Label(pg_tb_frame, text='Data')
@@ -100,10 +100,10 @@ class PageTable(Toplevel):
 		entries = list(self.process.data_pg_table.keys())
 		entries.sort()
 		for entry in entries:
-			self.key_label = Label(pg_tb_frame, text=entry)
-			self.key_label.grid(row=offset, column=1, padx=5)
-			self.value_label = Label(pg_tb_frame, text=self.process.data_pg_table[entry])
-			self.value_label.grid(row=offset, column=2, padx=5)
+			key_label = Label(pg_tb_frame, text=entry)
+			key_label.grid(row=offset, column=1, padx=5)
+			value_label = Label(pg_tb_frame, text=self.process.data_pg_table[entry])
+			value_label.grid(row=offset, column=2, padx=5)
 			offset += 1
 		
 class SimInterface(Frame):
@@ -162,7 +162,7 @@ class SimInterface(Frame):
 		for frame in frames:
 			self.page_sizes[frame.fid].set(str(frame.page.used) + '/' + str(frame.page.size))
 			visual_pg_name = self.page_names[frame.fid]
-			#detects frees and insertions
+			#detects frees and insertions, sets colors
 			if visual_pg_name.get() == '' and frame.page.name != '':
 				self.frame_labels[frame.fid]['fg'] = 'green'
 			if visual_pg_name.get() != '' and frame.page.name == '':
