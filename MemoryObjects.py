@@ -9,7 +9,7 @@ class PhysicalM(object):
 class Frame(object):
 	def __init__(self, fid):
 		self.fid = fid
-		self.page = Page(0, '', 0, True)
+		self.page = Page(0, 0, '', 0, True)
 		self.used = 0
 		self.size = MAX_SIZE
 
@@ -28,14 +28,13 @@ class Process(object):
 		self.data_size = data_size
 		self.text_pages = []
 		self.data_pages = []
-		self.proc_table = ProcessTable()
-
-class ProcessTable(object):
-	pageToFrame = {}
+		self.text_pg_table = {}
+		self.data_pg_table = {}
 
 class Page(object):
-	def __init__(self, pid, name, used, isEmpty):
+	def __init__(self, pid, number, name, used, isEmpty):
 		self.pid = pid
+		self.number = number
 		self.name = name
 		self.used = used
 		self.size = MAX_SIZE

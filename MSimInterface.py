@@ -3,6 +3,7 @@
 from tkinter import *
 from tkinter import messagebox
 from tkinter import filedialog
+from tkinter import font
 import OSBehavior
 import MemorySim
 import MemoryObjects
@@ -55,10 +56,58 @@ class SpecifyFile(Toplevel):
 		MemoryObjects.MAX_SIZE = int(self.page_size_input.get())
 		self.destroy()
 		msim = MemorySim.MemorySim(self.filename.get())
-		sim_interface = SimInterface(msim, master = root)
+		sim_interface = SimInterface(msim, master=root)
+
+class PageTable(Toplevel):
+	def __init__(self, pid, master=None):
+		self.process = [process for process in OSBehavior.processes if process.pid == pid][0]
+		Toplevel.__init__(self, master)
+		self.withdraw()
+		self.deiconify()
+		self.transient(self.master)
+		self.grab_set()
+		self.createWidgets()
+		
+	def createWidgets(self):
+		titleFont = font.Font(family="Arial", size=14)
+		pid_label = Label(self, text='Process ' + str(self.process.pid), font=titleFont, justify=CENTER)
+		pid_label.grid(row=0, pady=3)
+		
+		pg_tb_frame = Frame(self, relief=RAISED, borderwidth=1)
+		pg_tb_frame.grid(columnspan=3)
+		page_label = Label(pg_tb_frame, text='Page')
+		page_label.grid(row=0, column=1, padx=5)
+		frame_label = Label(pg_tb_frame, text='Frame')
+		frame_label.grid(row=0, column=2, padx=5)
+		text_label = Label(pg_tb_frame, text='Text')
+		text_label.grid(row=1, column=0, padx=5)
+		
+		#display Text page mapping
+		entries = list(self.process.text_pg_table.keys())
+		entries.sort()
+		offset = 1
+		for entry in entries:
+			self.key_label = Label(pg_tb_frame, text=entry)
+			self.key_label.grid(row=offset, column=1, padx=5)
+			self.value_label = Label(pg_tb_frame, text=self.process.text_pg_table[entry])
+			self.value_label.grid(row=offset, column=2, padx=5)
+			offset += 1
+		
+		data_label = Label(pg_tb_frame, text='Data')
+		data_label.grid(row=offset, column=0, padx=5)
+		
+		#display Data page mapping
+		entries = list(self.process.data_pg_table.keys())
+		entries.sort()
+		for entry in entries:
+			self.key_label = Label(pg_tb_frame, text=entry)
+			self.key_label.grid(row=offset, column=1, padx=5)
+			self.value_label = Label(pg_tb_frame, text=self.process.data_pg_table[entry])
+			self.value_label.grid(row=offset, column=2, padx=5)
+			offset += 1
 		
 class SimInterface(Frame):
-	def __init__(self, msim, master = None):
+	def __init__(self, msim, master=None):
 		self.msim = msim
 		self.page_names = [] #used for button text
 		self.page_sizes = []
@@ -82,9 +131,11 @@ class SimInterface(Frame):
 			
 			f_label = Label(frames_frame, text='Frame ' + str(frame.fid))
 			f_label.grid(row=frame.fid, padx=5)
-			f_button = Button(frames_frame, width=30, textvariable=self.page_names[frame.fid])
+			#lambda picks up last loop of frame, have to set frame buffer
+			f_button = Button(frames_frame, width=30, textvariable=self.page_names[frame.fid], command=(lambda tempFrame=frame:
+				self.showProcessTable(tempFrame.page)))
 			f_button.grid(row=frame.fid, column=1, padx=5, pady=3)
-			f_size_label = Label(frames_frame, width=8, textvariable=self.page_sizes[frame.fid])
+			f_size_label = Label(frames_frame, width=7, textvariable=self.page_sizes[frame.fid])
 			f_size_label.grid(row=frame.fid, column=2, padx=3)
 			
 			self.frame_labels.append(f_label)
@@ -98,7 +149,11 @@ class SimInterface(Frame):
 		
 		self.RESET = Button(self, width=10, text='Reset', command=self.reset)
 		self.RESET.grid(row=1, column=1, pady=10)
-		
+	
+	def showProcessTable(self, page):
+		if not page.isEmpty:
+			top = PageTable(page.pid, master=root)
+	
 	def stepCmd(self):
 		self.resetFrameColors()
 		info = self.msim.event_step()

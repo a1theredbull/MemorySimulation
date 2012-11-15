@@ -19,9 +19,9 @@ def allocateText(process, phys_m):
 	while remaining > 0:
 		name = 'P' + str(process.pid) + ' Text Page ' + str(count)
 		if remaining < MemoryObjects.MAX_SIZE:
-			txt_pages.append(MemoryObjects.Page(process.pid, name, remaining, False))
+			txt_pages.append(MemoryObjects.Page(process.pid, count, name, remaining, False))
 		else:		
-			txt_pages.append(MemoryObjects.Page(process.pid, name, MemoryObjects.MAX_SIZE, False))
+			txt_pages.append(MemoryObjects.Page(process.pid, count, name, MemoryObjects.MAX_SIZE, False))
 		remaining -= MemoryObjects.MAX_SIZE
 		count += 1
 
@@ -32,12 +32,12 @@ def allocateText(process, phys_m):
 		if not open_frames:
 			print('Full physical memory.')
 		else:
-			process.proc_table.pageToFrame[process.pid] = open_frames[0].fid
+			process.text_pg_table[str(pg.number)] = open_frames[0].fid
 			process.text_pages.append(pg)
 			open_frames[0].used = pg.used
 			open_frames[0].page = pg
 			open_frames.pop(0)
-
+	
 #finds open frames for data pages to be allocated to
 def allocateData(process, phys_m):
 	remaining = process.data_size
@@ -48,9 +48,9 @@ def allocateData(process, phys_m):
 	while remaining > 0:
 		name = 'P' + str(process.pid) + ' Data Page ' + str(count)
 		if remaining < MemoryObjects.MAX_SIZE:
-			dat_pages.append(MemoryObjects.Page(process.pid, name, remaining, False))
+			dat_pages.append(MemoryObjects.Page(process.pid, count, name, remaining, False))
 		else:		
-			dat_pages.append(MemoryObjects.Page(process.pid, name, MemoryObjects.MAX_SIZE, False))
+			dat_pages.append(MemoryObjects.Page(process.pid, count, name, MemoryObjects.MAX_SIZE, False))
 		remaining -= MemoryObjects.MAX_SIZE
 		count += 1
 
@@ -61,7 +61,7 @@ def allocateData(process, phys_m):
 		if not open_frames:
 			print('Full physical memory.')
 		else:
-			process.proc_table.pageToFrame[process.pid] = open_frames[0].fid
+			process.data_pg_table[str(pg.number)] = open_frames[0].fid
 			process.data_pages.append(pg)
 			open_frames[0].used = pg.used
 			open_frames[0].page = pg
